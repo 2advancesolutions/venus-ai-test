@@ -22,7 +22,6 @@ export default function EmailComposer({ isOpen, onClose }: EmailComposerProps) {
     removeRecipient,
     addAttachment,
     removeAttachment,
-    updateAttachmentProgress,
     handleSend,
     showCC,
     setShowCC,
