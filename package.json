@@ -1,7 +1,6 @@
 {
-  "name": "venus-ai-test",
-  "version": "1.0.0",
-  "description": "Email composition interface built with React + TypeScript + TailwindCSS",
+  "name": "email-composer",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -10,16 +9,16 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "@headlessui/react": "^1.7.17",
-    "@tiptap/react": "^2.1.13",
-    "@tiptap/starter-kit": "^2.1.13",
     "@tiptap/extension-mention": "^2.1.13",
     "@tiptap/extension-link": "^2.1.13",
-    "react-dropzone": "^14.2.3",
+    "@tiptap/extension-placeholder": "^2.1.13",
+    "@tiptap/react": "^2.1.13",
+    "@tiptap/starter-kit": "^2.1.13",
     "lucide-react": "^0.294.0",
-    "clsx": "^2.0.0"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-dropzone": "^14.2.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",

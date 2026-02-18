@@ -1,12 +1,12 @@
-import { Fragment, useEffect } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { ComposerHeader } from './components/ComposerHeader'
-import { FromField } from './components/FromField'
-import { RecipientField } from './components/RecipientField'
-import { RichTextEditor } from './components/RichTextEditor'
-import { SignatureSection } from './components/SignatureSection'
-import { FileAttachment } from './components/FileAttachment'
-import { ActionBar } from './components/ActionBar'
+import { Fragment } from 'react'
+import ComposerHeader from './components/ComposerHeader'
+import FromField from './components/FromField'
+import RecipientField from './components/RecipientField'
+import RichTextEditor from './components/RichTextEditor'
+import SignatureSection from './components/SignatureSection'
+import FileAttachment from './components/FileAttachment'
+import ActionBar from './components/ActionBar'
 import { useEmailComposer } from './hooks/useEmailComposer'
 
 interface EmailComposerProps {
@@ -14,64 +14,21 @@ interface EmailComposerProps {
   onClose: () => void
 }
 
-const EmailComposer = ({ isOpen, onClose }: EmailComposerProps) => {
+export default function EmailComposer({ isOpen, onClose }: EmailComposerProps) {
   const {
-    draft,
-    showCC,
-    showBCC,
-    setShowCC,
-    setShowBCC,
+    emailData,
+    updateField,
     addRecipient,
     removeRecipient,
-    updateBody,
     addAttachment,
     removeAttachment,
-    getCharacterCount,
-    canSend
+    updateAttachmentProgress,
+    handleSend,
+    showCC,
+    setShowCC,
+    showBCC,
+    setShowBCC,
   } = useEmailComposer()
-
-  // Add initial attachment for demo
-  useEffect(() => {
-    if (isOpen && draft.attachments.length === 0) {
-      // Simulate adding the demo PDF file
-      const demoFile = new File([''], 'Tech design requirements.pdf', { type: 'application/pdf' })
-      Object.defineProperty(demoFile, 'size', { value: 204800 }) // 200 KB
-      addAttachment(demoFile)
-    }
-  }, [isOpen])
-
-  const handleSend = () => {
-    console.log('Sending email:', draft)
-    alert('Email sent! (This is a demo - check console for draft data)')
-    onClose()
-  }
-
-  const handleAttach = () => {
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.multiple = true
-    input.onchange = (e) => {
-      const files = (e.target as HTMLInputElement).files
-      if (files) {
-        Array.from(files).forEach(file => addAttachment(file))
-      }
-    }
-    input.click()
-  }
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (isOpen && (e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-        if (canSend()) {
-          handleSend()
-        }
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, canSend, draft])
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -85,7 +42,7 @@ const EmailComposer = ({ isOpen, onClose }: EmailComposerProps) => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+          <div className="fixed inset-0 bg-black/25" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -99,73 +56,98 @@ const EmailComposer = ({ isOpen, onClose }: EmailComposerProps) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-xl bg-white shadow-2xl transition-all">
-                <div className="flex flex-col max-h-[90vh]">
-                  <ComposerHeader
-                    onMinimize={() => console.log('Minimize')}
-                    onPopout={() => console.log('Pop out')}
-                    onCopy={() => console.log('Copy')}
-                  />
+              <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white shadow-xl transition-all">
+                <div className="flex flex-col h-[90vh] max-h-[900px]">
+                  {/* Header */}
+                  <ComposerHeader onClose={onClose} />
 
+                  {/* Scrollable Content */}
                   <div className="flex-1 overflow-y-auto">
-                    <FromField sender={draft.from} />
-
-                    <RecipientField
-                      label="To"
-                      type="to"
-                      recipients={draft.to}
-                      onAdd={(recipient) => addRecipient('to', recipient)}
-                      onRemove={(email) => removeRecipient('to', email)}
-                      showCCBCC={!showCC && !showBCC}
-                      onShowCC={() => setShowCC(true)}
-                      onShowBCC={() => setShowBCC(true)}
+                    {/* From Field */}
+                    <FromField
+                      from={emailData.from}
+                      onChange={(from) => updateField('from', from)}
                     />
 
+                    {/* To Field */}
+                    <RecipientField
+                      label="To"
+                      recipients={emailData.to}
+                      onAdd={(email) => addRecipient('to', email)}
+                      onRemove={(email) => removeRecipient('to', email)}
+                      showCC={showCC}
+                      showBCC={showBCC}
+                      onToggleCC={() => setShowCC(!showCC)}
+                      onToggleBCC={() => setShowBCC(!showBCC)}
+                    />
+
+                    {/* CC Field */}
                     {showCC && (
                       <RecipientField
-                        label="Cc"
-                        type="cc"
-                        recipients={draft.cc}
-                        onAdd={(recipient) => addRecipient('cc', recipient)}
+                        label="CC"
+                        recipients={emailData.cc}
+                        onAdd={(email) => addRecipient('cc', email)}
                         onRemove={(email) => removeRecipient('cc', email)}
                       />
                     )}
 
+                    {/* BCC Field */}
                     {showBCC && (
                       <RecipientField
-                        label="Bcc"
-                        type="bcc"
-                        recipients={draft.bcc}
-                        onAdd={(recipient) => addRecipient('bcc', recipient)}
+                        label="BCC"
+                        recipients={emailData.bcc}
+                        onAdd={(email) => addRecipient('bcc', email)}
                         onRemove={(email) => removeRecipient('bcc', email)}
                       />
                     )}
 
-                    <RichTextEditor
-                      content={draft.body}
-                      onChange={updateBody}
-                    />
+                    {/* Subject */}
+                    <div className="px-6 py-3 border-b border-gray-200">
+                      <input
+                        type="text"
+                        placeholder="Subject"
+                        value={emailData.subject}
+                        onChange={(e) => updateField('subject', e.target.value)}
+                        className="w-full text-sm text-gray-900 placeholder-gray-400 focus:outline-none"
+                      />
+                    </div>
 
+                    {/* Rich Text Editor */}
+                    <div className="px-6 py-4">
+                      <RichTextEditor
+                        content={emailData.body}
+                        onChange={(content) => updateField('body', content)}
+                      />
+                    </div>
+
+                    {/* Signature */}
                     <SignatureSection
-                      signature={draft.signature}
-                      characterCount={getCharacterCount()}
+                      signature={emailData.signature}
+                      onChange={(signature) => updateField('signature', signature)}
                     />
 
-                    <FileAttachment
-                      attachments={draft.attachments}
-                      onAdd={addAttachment}
-                      onRemove={removeAttachment}
-                    />
+                    {/* Attachments */}
+                    {emailData.attachments.length > 0 && (
+                      <div className="px-6 py-4 space-y-2">
+                        {emailData.attachments.map((file) => (
+                          <FileAttachment
+                            key={file.id}
+                            file={file}
+                            onRemove={() => removeAttachment(file.id)}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
 
+                  {/* Action Bar */}
                   <ActionBar
                     onDelete={onClose}
-                    onAttach={handleAttach}
+                    onAttach={addAttachment}
                     onSchedule={() => console.log('Schedule')}
                     onRemindMe={() => console.log('Remind me')}
                     onSendLater={() => console.log('Send later')}
-                    onSend={handleSend}
-                    canSend={canSend()}
+                    onSend={() => handleSend(onClose)}
                   />
                 </div>
               </Dialog.Panel>
@@ -176,5 +158,3 @@ const EmailComposer = ({ isOpen, onClose }: EmailComposerProps) => {
     </Transition>
   )
 }
-
-export default EmailComposer

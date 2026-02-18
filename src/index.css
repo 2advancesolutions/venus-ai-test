@@ -2,55 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  * {
-    @apply border-gray-200;
-  }
-  
-  body {
-    @apply bg-gray-50 text-gray-900;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  }
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Tiptap Editor Styles */
-.ProseMirror {
-  @apply outline-none min-h-[200px] p-4;
-}
-
-.ProseMirror p {
-  @apply mb-2;
-}
-
-.ProseMirror a {
-  @apply text-blue-600 underline;
-}
-
-.ProseMirror ul,
-.ProseMirror ol {
-  @apply pl-6 mb-2;
-}
-
-.ProseMirror ul {
-  @apply list-disc;
-}
-
-.ProseMirror ol {
-  @apply list-decimal;
-}
-
-.ProseMirror strong {
-  @apply font-semibold;
-}
-
-.ProseMirror em {
-  @apply italic;
-}
-
-.ProseMirror u {
-  @apply underline;
-}
-
-.ProseMirror .mention {
-  @apply text-blue-600 bg-blue-50 px-1 rounded;
+* {
+  box-sizing: border-box;
 }

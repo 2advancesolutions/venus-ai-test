@@ -1,122 +1,138 @@
-import { useState, useCallback } from 'react'
-import { EmailDraft, Recipient, FileAttachment, RecipientFieldType } from '../types'
+import { useState } from 'react'
+import { EmailData, Recipient, FileAttachment } from '../../../types'
 
-const initialSender = {
-  name: 'Olivia Rhye',
-  email: 'hello@oliviarhye.com',
-  avatar: 'OR'
-}
+export function useEmailComposer() {
+  const [showCC, setShowCC] = useState(false)
+  const [showBCC, setShowBCC] = useState(false)
 
-const initialRecipients: Recipient[] = [
-  { email: 'phoenix@catalog.com', name: 'Phoenix' },
-  { email: 'candice@catalog.com', name: 'Candice' }
-]
-
-export const useEmailComposer = () => {
-  const [draft, setDraft] = useState<EmailDraft>({
-    from: initialSender,
-    to: initialRecipients,
+  const [emailData, setEmailData] = useState<EmailData>({
+    from: {
+      name: 'Olivia Rhye',
+      email: 'hello@oliviarhye.com',
+    },
+    to: [
+      { email: 'phoenix@catalog.com' },
+      { email: 'candice@catalog.com' },
+    ],
     cc: [],
     bcc: [],
     subject: '',
     body: '',
     signature: 'Olivia Rhye',
-    attachments: []
+    attachments: [
+      {
+        id: '1',
+        name: 'Tech design requirements.pdf',
+        size: 200 * 1024, // 200 KB
+        progress: 70,
+        type: 'application/pdf',
+      },
+    ],
   })
 
-  const [showCC, setShowCC] = useState(false)
-  const [showBCC, setShowBCC] = useState(false)
+  const updateField = <K extends keyof EmailData>(
+    field: K,
+    value: EmailData[K]
+  ) => {
+    setEmailData((prev) => ({ ...prev, [field]: value }))
+  }
 
-  const addRecipient = useCallback((type: RecipientFieldType, recipient: Recipient) => {
-    setDraft(prev => ({
+  const addRecipient = (field: 'to' | 'cc' | 'bcc', email: string) => {
+    const recipient: Recipient = { email }
+    setEmailData((prev) => ({
       ...prev,
-      [type]: [...prev[type], recipient]
+      [field]: [...prev[field], recipient],
     }))
-  }, [])
+  }
 
-  const removeRecipient = useCallback((type: RecipientFieldType, email: string) => {
-    setDraft(prev => ({
+  const removeRecipient = (field: 'to' | 'cc' | 'bcc', email: string) => {
+    setEmailData((prev) => ({
       ...prev,
-      [type]: prev[type].filter(r => r.email !== email)
+      [field]: prev[field].filter((r) => r.email !== email),
     }))
-  }, [])
+  }
 
-  const updateBody = useCallback((body: string) => {
-    setDraft(prev => ({ ...prev, body }))
-  }, [])
-
-  const updateSubject = useCallback((subject: string) => {
-    setDraft(prev => ({ ...prev, subject }))
-  }, [])
-
-  const addAttachment = useCallback((file: File) => {
-    const newAttachment: FileAttachment = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      progress: 0,
-      status: 'uploading'
+  const addAttachment = () => {
+    // Simulate file picker
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.multiple = true
+    input.onchange = (e) => {
+      const files = (e.target as HTMLInputElement).files
+      if (files) {
+        Array.from(files).forEach((file) => {
+          const attachment: FileAttachment = {
+            id: Math.random().toString(36).substr(2, 9),
+            name: file.name,
+            size: file.size,
+            progress: 0,
+            type: file.type,
+          }
+          setEmailData((prev) => ({
+            ...prev,
+            attachments: [...prev.attachments, attachment],
+          }))
+          
+          // Simulate upload progress
+          simulateUploadProgress(attachment.id)
+        })
+      }
     }
+    input.click()
+  }
 
-    setDraft(prev => ({
-      ...prev,
-      attachments: [...prev.attachments, newAttachment]
-    }))
-
-    // Simulate upload progress
-    simulateUpload(newAttachment.id)
-
-    return newAttachment.id
-  }, [])
-
-  const simulateUpload = (attachmentId: string) => {
+  const simulateUploadProgress = (attachmentId: string) => {
     let progress = 0
     const interval = setInterval(() => {
       progress += 10
-      setDraft(prev => ({
-        ...prev,
-        attachments: prev.attachments.map(att =>
-          att.id === attachmentId
-            ? { ...att, progress, status: progress >= 100 ? 'complete' : 'uploading' }
-            : att
-        )
-      }))
-
-      if (progress >= 100) {
+      if (progress > 100) {
         clearInterval(interval)
+        return
       }
+      updateAttachmentProgress(attachmentId, progress)
     }, 200)
   }
 
-  const removeAttachment = useCallback((id: string) => {
-    setDraft(prev => ({
+  const removeAttachment = (attachmentId: string) => {
+    setEmailData((prev) => ({
       ...prev,
-      attachments: prev.attachments.filter(att => att.id !== id)
+      attachments: prev.attachments.filter((a) => a.id !== attachmentId),
     }))
-  }, [])
+  }
 
-  const getCharacterCount = useCallback(() => {
-    return draft.signature.length
-  }, [draft.signature])
+  const updateAttachmentProgress = (attachmentId: string, progress: number) => {
+    setEmailData((prev) => ({
+      ...prev,
+      attachments: prev.attachments.map((a) =>
+        a.id === attachmentId ? { ...a, progress } : a
+      ),
+    }))
+  }
 
-  const canSend = useCallback(() => {
-    return draft.to.length > 0 && (draft.body.length > 0 || draft.attachments.length > 0)
-  }, [draft.to, draft.body, draft.attachments])
+  const handleSend = (onClose: () => void) => {
+    // Validate required fields
+    if (emailData.to.length === 0) {
+      alert('Please add at least one recipient')
+      return
+    }
+
+    console.log('Sending email:', emailData)
+    alert('Email sent! (This is a demo)')
+    onClose()
+  }
 
   return {
-    draft,
-    showCC,
-    showBCC,
-    setShowCC,
-    setShowBCC,
+    emailData,
+    updateField,
     addRecipient,
     removeRecipient,
-    updateBody,
-    updateSubject,
     addAttachment,
     removeAttachment,
-    getCharacterCount,
-    canSend
+    updateAttachmentProgress,
+    handleSend,
+    showCC,
+    setShowCC,
+    showBCC,
+    setShowBCC,
   }
 }

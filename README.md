@@ -1,49 +1,28 @@
-# Email Composition Interface
+# Email Composer Component
 
-A fully-featured email composition interface built with React, TypeScript, and TailwindCSS. Built by Venus 🌟
+A fully-featured email composition interface built with React, TypeScript, TailwindCSS, and Tiptap.
 
 ## Features
 
-✨ **Modern UI Components**
-- Clean, Gmail-inspired design with subtle animations
-- Responsive modal dialog with focus trap
-- Beautiful color scheme and typography
-
-📧 **Email Composition**
-- From field with sender dropdown
-- To/CC/BCC recipient fields with chip-based input
-- Email validation and multi-recipient support
-- Quick CC/BCC toggle buttons
-
-✍️ **Rich Text Editor** (powered by Tiptap)
-- Bold, italic, underline formatting
-- Link insertion with preview
-- Bullet and numbered lists
-- @mention support
-- Full HTML content editing
-
-📎 **File Attachments**
-- Drag-and-drop file upload
-- Upload progress indicators
-- File type detection with icons
-- Remove attachments functionality
-
-🎨 **User Experience**
-- Character counter for signatures
-- Keyboard shortcuts (Cmd/Ctrl+Enter to send, Esc to close)
-- Form validation (can't send without recipients)
-- Smooth transitions and hover states
-- Accessible (ARIA labels, keyboard navigation)
+- **Full-featured composition modal** with minimize, pop-out, and copy actions
+- **From field** with avatar and dropdown selector
+- **Recipient management** with chips for To/CC/BCC fields
+- **Rich text editor** with formatting toolbar (bold, italic, links, lists)
+- **@mentions** support in editor
+- **Email signature** with character counter
+- **File attachment** with upload progress indicator
+- **Action bar** with delete, attach, schedule, and send options
+- **Responsive design** optimized for desktop
+- **Keyboard shortcuts** support
 
 ## Tech Stack
 
-- **React 18** - UI library
+- **React 18** - UI framework
 - **TypeScript** - Type safety
-- **TailwindCSS** - Utility-first styling
-- **Headless UI** - Accessible components (Dialog, Menu)
+- **TailwindCSS** - Styling
+- **Headless UI** - Accessible modal and dropdowns
 - **Tiptap** - Rich text editor
-- **React Dropzone** - File upload handling
-- **Lucide React** - Icon library
+- **Lucide React** - Icons
 - **Vite** - Build tool
 
 ## Getting Started
@@ -60,7 +39,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
 
 ### Build
 
@@ -74,130 +53,101 @@ npm run build
 npm run preview
 ```
 
-## Project Structure
+## Component Structure
 
 ```
 src/
 ├── components/
 │   └── EmailComposer/
 │       ├── index.tsx                    # Main composer component
-│       ├── types.ts                     # TypeScript interfaces
-│       ├── hooks/
-│       │   └── useEmailComposer.ts      # State management hook
-│       └── components/
-│           ├── ComposerHeader.tsx       # Title + action buttons
-│           ├── FromField.tsx            # Sender dropdown
-│           ├── RecipientField.tsx       # To/CC/BCC with chips
-│           ├── RichTextEditor.tsx       # Formatting toolbar + editor
-│           ├── SignatureSection.tsx     # Signature with char count
-│           ├── FileAttachment.tsx       # Upload progress card
-│           └── ActionBar.tsx            # Bottom buttons
-├── App.tsx                              # Root component
-├── main.tsx                             # App entry point
-└── index.css                            # Global styles + Tailwind
+│       ├── components/
+│       │   ├── ComposerHeader.tsx       # Header with actions
+│       │   ├── FromField.tsx            # Sender dropdown
+│       │   ├── RecipientField.tsx       # To/CC/BCC chips
+│       │   ├── RichTextEditor.tsx       # Tiptap editor
+│       │   ├── SignatureSection.tsx     # Signature with counter
+│       │   ├── FileAttachment.tsx       # Upload progress card
+│       │   └── ActionBar.tsx            # Bottom action buttons
+│       └── hooks/
+│           └── useEmailComposer.ts      # State management
+├── types.ts                             # TypeScript interfaces
+├── App.tsx                              # Demo app
+└── main.tsx                             # Entry point
 ```
 
-## Component Details
+## Usage
 
-### EmailComposer
-Main modal component that orchestrates all subcomponents. Handles:
-- Modal open/close state
-- Focus management
-- Keyboard shortcuts
-- Send logic
+```tsx
+import EmailComposer from './components/EmailComposer'
 
-### useEmailComposer Hook
-Centralized state management for:
-- Email draft (from, to, cc, bcc, body, signature, attachments)
-- Recipient management (add/remove)
-- File upload simulation
-- Form validation
+function App() {
+  const [isOpen, setIsOpen] = useState(false)
 
-### RichTextEditor
-Powered by Tiptap with custom toolbar. Features:
-- 6 formatting options (bold, italic, link, image, bullet list, numbered list)
-- @mention extension
-- Real-time HTML output
+  return (
+    <>
+      <button onClick={() => setIsOpen(true)}>
+        Compose Email
+      </button>
+      
+      <EmailComposer 
+        isOpen={isOpen} 
+        onClose={() => setIsOpen(false)} 
+      />
+    </>
+  )
+}
+```
 
-### RecipientField
-Smart input field that:
-- Converts typed emails into chips
-- Validates email format
-- Supports keyboard navigation (Enter, Comma, Space to add; Backspace to remove)
-- Shows/hides CC/BCC fields on demand
+## Features In Detail
 
-### FileAttachment
-Upload interface with:
-- React Dropzone integration
-- Simulated progress (0-100%)
-- File size formatting
-- Visual progress bar
-- PDF icon for document files
+### Recipient Management
+- Add recipients by typing email and pressing Enter, comma, or space
+- Remove recipients by clicking X or pressing Backspace
+- Email validation before adding
+- Toggle CC/BCC fields
 
-## Design Tokens
+### Rich Text Editor
+- Bold, Italic formatting
+- Links with URL dialog
+- Bullet and numbered lists
+- @mentions support (type @ to trigger)
+- Styled content (underline, links)
 
-### Colors
-- Background: `#FFFFFF`, `#F9FAFB`
-- Text: `#111827` (primary), `#6B7280` (secondary)
-- Links: `#2563EB`
-- Accents: Red for PDF icons
+### File Attachments
+- Click attach button or drag-and-drop files
+- Visual upload progress indicator
+- Remove attachments before sending
+- File type and size display
 
-### Typography
-- Font: Inter (sans-serif)
-- Weights: 400 (regular), 500 (medium), 600 (semibold)
+### Keyboard Support
+- `Cmd/Ctrl + Enter` - Send email (coming soon)
+- `Esc` - Close modal
+- `Backspace` - Remove last recipient when input is empty
+- Full keyboard navigation in editor
 
-### Spacing
-- Consistent padding: 16px/24px (px-4/px-6, py-4)
-- Component gaps: 8px/12px (gap-2/gap-3)
+## Design System
 
-## Testing Checklist
-
-**Functionality:**
-- [x] Modal opens and closes
-- [x] Add/remove recipients in To/CC/BCC
-- [x] Email validation works
-- [x] Rich text formatting applies
-- [x] Links are clickable
-- [x] File upload shows progress
-- [x] Character counter updates
-- [x] Send button enables/disables correctly
-- [x] Keyboard shortcuts work
-
-**Edge Cases:**
-- [x] Multiple recipients
-- [x] Long email addresses
-- [x] Empty fields (Send disabled)
-- [x] Multiple file attachments
-
-**Accessibility:**
-- [x] Focus trap in modal
-- [x] Keyboard navigation
-- [x] ARIA labels
-- [x] Esc to close
+The component follows a clean, modern design with:
+- **Colors**: White/light gray backgrounds, dark text, blue accents
+- **Typography**: Inter font family, multiple weights
+- **Spacing**: Generous padding and consistent gaps
+- **Components**: Rounded corners, subtle borders, smooth transitions
 
 ## Future Enhancements
 
-- Draft autosave to localStorage
-- Email templates with variables
-- Emoji picker
-- Rich text image upload (currently prompts for URL)
-- Schedule send with date/time picker
-- Read receipts
-- Email threading
-- Dark mode
+- [ ] Draft autosave to localStorage
+- [ ] Template variables support
+- [ ] Emoji picker
+- [ ] Keyboard shortcuts overlay
+- [ ] Real file upload API integration
+- [ ] Email templates
+- [ ] Scheduled send functionality
+- [ ] Undo/redo in editor
 
-## Notes
+## License
 
-This is a demo implementation. In production, you'd want to:
-- Connect to a real email API
-- Implement actual file upload to cloud storage
-- Add server-side validation
-- Store drafts in database
-- Add user authentication
-- Implement rate limiting
+MIT
 
 ---
 
 Built with ❤️ by Venus 🌟
-
-*"Fixed the email composer — turns out building Gmail is harder than it looks. Who knew."*
