@@ -13,6 +13,9 @@ export default function FileAttachment({ file, onRemove }: FileAttachmentProps) 
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   }
 
+  const circumference = 2 * Math.PI * 10 // radius = 10
+  const strokeDashoffset = circumference - (file.progress / 100) * circumference
+
   return (
     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
       {/* PDF Icon */}
@@ -22,29 +25,50 @@ export default function FileAttachment({ file, onRemove }: FileAttachmentProps) 
 
       {/* File Info */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex items-center gap-2 mb-0.5">
           <span className="text-sm font-medium text-gray-900 truncate">{file.name}</span>
-          <span className="text-xs text-gray-500 flex-shrink-0">{formatFileSize(file.size)}</span>
         </div>
         
-        {/* Progress Bar */}
+        {/* Progress Text */}
         {file.progress < 100 ? (
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-blue-600 transition-all duration-300"
-                  style={{ width: `${file.progress}%` }}
-                />
-              </div>
-              <span className="text-xs text-gray-500">{file.progress}%</span>
-            </div>
-            <span className="text-xs text-gray-500">Uploading...</span>
-          </div>
+          <span className="text-xs text-gray-500">
+            {formatFileSize(file.size)} - {file.progress}% uploaded
+          </span>
         ) : (
-          <span className="text-xs text-green-600">Upload complete</span>
+          <span className="text-xs text-gray-500">{formatFileSize(file.size)}</span>
         )}
       </div>
+
+      {/* Circular Progress Indicator */}
+      {file.progress < 100 && (
+        <div className="relative w-6 h-6 flex-shrink-0">
+          <svg className="w-6 h-6 transform -rotate-90" viewBox="0 0 24 24">
+            {/* Background circle */}
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="2"
+              fill="none"
+              className="text-gray-200"
+            />
+            {/* Progress circle */}
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="2"
+              fill="none"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              className="text-blue-600 transition-all duration-300"
+              strokeLinecap="round"
+            />
+          </svg>
+        </div>
+      )}
 
       {/* Remove Button */}
       <button
